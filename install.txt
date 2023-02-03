@@ -1,0 +1,9 @@
+charset,UTF-8
+type,ghost
+
+//ゴーストの名前
+name,SimpleYAYAテンプレート
+
+//インストールするフォルダ名
+directory,simple_yaya
+
