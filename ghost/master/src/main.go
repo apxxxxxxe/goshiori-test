@@ -15,48 +15,80 @@ C:\SSP\ghost\ikaga\ghost\master\
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 
 	shiori "github.com/Narazaka/shiorigo"
-	"github.com/apxxxxxxe/gohst/dictionary"
-)
-
-const name = "GO"
-const version = "0.1.0"
-const logFile = "err.log"
-
-const (
-	statusOK        = 200
-	statusNoContent = 204
+	"github.com/apxxxxxxe/goshiori-test/dictionary"
 )
 
 var (
 	Dictionary *dictionary.Dictionary
+	logFile    *os.File
 )
 
 func main() {
 	var scanner = bufio.NewScanner(os.Stdin)
+
 	for {
 		scanner.Scan()
 		switch scanner.Text() {
 		case "LOAD SHIORIPROXY/1.0":
-			load(scanner)
+			if err := load(scanner); err != nil {
+				log.Printf("[error] load: %s\n", err)
+			}
+			log.Println("[info] load()")
+			fmt.Print("1\r\n")
+
 		case "REQUEST SHIORIPROXY/1.0":
-			request(scanner)
+			log.Println("[info] request()")
+			res, err := request(scanner)
+			if err != nil {
+				log.Printf("[error] request: %s\n", err)
+			}
+			log.Println(res)
+			fmt.Print(res)
+
 		case "UNLOAD SHIORIPROXY/1.0":
-			unload()
+			log.Println("[info] unload()")
+			if err := unload(); err != nil {
+				log.Printf("[error] unload: %s\n", err)
+			}
+			fmt.Print("1\r\n")
+			os.Exit(0)
 		}
 	}
 }
 
-func load(scanner *bufio.Scanner) string {
-	scanner.Scan()
-	dirPath := scanner.Text()
-	fmt.Print("1\r\n")
-	return dirPath
+func load(scanner *bufio.Scanner) error {
+	exec, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	dicDir := filepath.Dir(exec)
+
+	// 辞書と変数をDictionaryに読み込む
+	Dictionary, err = dictionary.New()
+	if err != nil {
+		return err
+	}
+
+	//ログ書き込み設定
+	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
+	log.SetOutput(os.Stdout)
+	path := filepath.Join(dicDir, "shiori.log")
+	logFile, err = os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else if err == nil && logFile != nil {
+		log.SetOutput(logFile)
+	}
+
+	return nil
 }
 
-func request(scanner *bufio.Scanner) {
+func request(scanner *bufio.Scanner) (shiori.Response, error) {
 	requestStr := ""
 	for {
 		scanner.Scan()
@@ -66,39 +98,36 @@ func request(scanner *bufio.Scanner) {
 			break
 		}
 	}
-	r, err := shiori.ParseRequest(requestStr)
+	req, err := shiori.ParseRequest(requestStr)
 	if err != nil {
-		os.WriteFile(logFile, []byte(err.Error()), 0644)
+		return dictionary.ResponseInternalServerError(), err
 	}
-	processRequest(r)
+
+	log.Println(req)
+
+	// リクエストヘッダがなければ、統一的操作のために初期化しておきます。
+	if req.Headers == nil {
+		req.Headers = shiori.RequestHeaders{}
+	}
+	// ID ヘッダにはイベント名が入っています。
+	// イベントに対応するハンドラが定義されていれば呼び出します。
+	if event, ok := req.Headers["ID"]; ok {
+		if handler, ok := Dictionary.Handlers[event]; ok {
+			return handler(req, Dictionary.Variables)
+		}
+	}
+
+	return dictionary.ResponseNoContent(), nil
 }
 
-func processRequest(req shiori.Request) {
-	var value string
-	status := statusOK
-
-	switch req.Headers["ID"] {
-	case "version":
-		value = version
-	case "OnFirstBoot", "OnBoot":
-		value = "\\0HogeFuga\\e"
+func unload() error {
+	if err := dictionary.SaveVariables(*Dictionary.Variables); err != nil {
+		return err
 	}
 
-	res := shiori.Response{
-		Protocol: shiori.SHIORI,
-		Version:  "3.0",
-		Code:     status,
-		Headers: shiori.ResponseHeaders{
-			"Charset": "Shift_JIS",
-			"Sender":  name,
-			"Value":   value,
-		},
+	if logFile != nil {
+		logFile.Close()
 	}
 
-	fmt.Print(res)
-}
-
-func unload() {
-	fmt.Print("1\r\n")
-	os.Exit(0)
+	return nil
 }

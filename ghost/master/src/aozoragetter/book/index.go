@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/apxxxxxxe/gohst/aozoragetter/setting"
+	"github.com/apxxxxxxe/goshiori-test/aozoragetter/setting"
 )
 
 type Book struct {

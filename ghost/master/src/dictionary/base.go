@@ -3,13 +3,16 @@ package dictionary
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 
 	shiori "github.com/Narazaka/shiorigo"
-	"github.com/apxxxxxxe/gohst/aozoragetter/balloon"
+	"github.com/apxxxxxxe/goshiori-test/aozoragetter/balloon"
 )
 
 // 定数
 const (
+	name           = "goshiori"
+	version        = "0.1.0"
 	charaCount     = 2
 	varFile        = "var.json"
 	mouseMoveLimit = 50
@@ -19,6 +22,7 @@ const (
 // グローバル変数
 // 終了時に保存の必要がない(起動ごとに初期化する)ものは`json:"-"`
 type Variables struct {
+	DicDir              string          `json:"-"`
 	SecondsFromLastTalk int             `json:"-"`
 	TalkFrequency       int             `json:"talk_frequency"`
 	MouseMoveCount      []int           `json:"-"`
@@ -41,7 +45,13 @@ func SaveVariables(vars Variables) error {
 		return err
 	}
 
-	if err := os.WriteFile(varFile, j, 0644); err != nil {
+	exec, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	dicDir := filepath.Dir(exec)
+
+	if err := os.WriteFile(filepath.Join(dicDir, varFile), j, 0644); err != nil {
 		return err
 	}
 
@@ -71,10 +81,10 @@ func New() (*Dictionary, error) {
 
 	// shioriの情報を格納
 	Info := map[string]string{
-		"version":   "1.00",
-		"name":      "gohst",
-		"craftman":  "kurousada",
-		"craftmanw": "kurousada",
+		"version":   version,
+		"name":      name,
+		"craftman":  "hinotsumi",
+		"craftmanw": "日野つみ",
 	}
 	for event, value := range Info {
 		handlers[event] = CreateGetHandlerOf(value)
@@ -101,12 +111,20 @@ func New() (*Dictionary, error) {
 }
 
 func loadVariables() (*Variables, error) {
-	if _, err := os.Stat(varFile); err != nil {
+	exec, err := os.Executable()
+	if err != nil {
+		return nil, err
+	}
+	dicDir := filepath.Dir(exec)
+
+	varPath := filepath.Join(dicDir, varFile)
+
+	if _, err := os.Stat(varPath); err != nil {
 		// varFileが存在しない
 		return nil, nil
 	}
 
-	b, err := os.ReadFile(varFile)
+	b, err := os.ReadFile(varPath)
 	if err != nil {
 		return nil, err
 	}

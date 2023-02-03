@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	shiori "github.com/Narazaka/shiorigo"
-	"github.com/apxxxxxxe/gohst/aozoragetter/book"
+	"github.com/apxxxxxxe/goshiori-test/aozoragetter/book"
 )
 
 var repSpaces = regexp.MustCompile(`[ 　]`)

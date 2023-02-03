@@ -1,6 +1,0 @@
-LIBRARY	shiori
-
-EXPORTS
-    load
-    unload
-    request

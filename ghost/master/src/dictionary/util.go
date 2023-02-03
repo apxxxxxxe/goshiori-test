@@ -24,20 +24,24 @@ func (values Talks) OneOf() string {
 	return list[i]
 }
 
+var defaultHeaders = shiori.ResponseHeaders{
+	"Charset": "UTF-8",
+}
+
 func ResponseNoContent() shiori.Response {
-	return shiori.Response{Protocol: shiori.SHIORI, Version: "3.0", Code: 204, Headers: shiori.ResponseHeaders{}}
+	return shiori.Response{Protocol: shiori.SHIORI, Version: "3.0", Code: 204, Headers: defaultHeaders}
 }
 
 func ResponseBadRequest() shiori.Response {
-	return shiori.Response{Protocol: shiori.SHIORI, Version: "3.0", Code: 400, Headers: shiori.ResponseHeaders{}}
+	return shiori.Response{Protocol: shiori.SHIORI, Version: "3.0", Code: 400, Headers: defaultHeaders}
 }
 
 func ResponseInternalServerError() shiori.Response {
-	return shiori.Response{Protocol: shiori.SHIORI, Version: "3.0", Code: 500, Headers: shiori.ResponseHeaders{}}
+	return shiori.Response{Protocol: shiori.SHIORI, Version: "3.0", Code: 500, Headers: defaultHeaders}
 }
 
 func ResponseOK(value string) shiori.Response {
-	res := shiori.Response{Protocol: shiori.SHIORI, Version: "3.0", Code: 200, Headers: shiori.ResponseHeaders{}}
+	res := shiori.Response{Protocol: shiori.SHIORI, Version: "3.0", Code: 200, Headers: defaultHeaders}
 	if value != "" {
 		res.Headers["Value"] = value
 	}

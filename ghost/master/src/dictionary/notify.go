@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	shiori "github.com/Narazaka/shiorigo"
-	"github.com/apxxxxxxe/gohst/aozoragetter/balloon"
+	"github.com/apxxxxxxe/goshiori-test/aozoragetter/balloon"
 )
 
 const EventOnGetBalloonInfo = "OnGetBalloonInfo"

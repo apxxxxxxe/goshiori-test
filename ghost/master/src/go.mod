@@ -1,4 +1,4 @@
-module github.com/apxxxxxxe/gohst
+module github.com/apxxxxxxe/goshiori-test
 
 go 1.19
 

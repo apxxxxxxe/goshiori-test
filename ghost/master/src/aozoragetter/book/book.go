@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/apxxxxxxe/gohst/aozoragetter/format"
-	"github.com/apxxxxxxe/gohst/aozoragetter/setting"
+	"github.com/apxxxxxxe/goshiori-test/aozoragetter/format"
+	"github.com/apxxxxxxe/goshiori-test/aozoragetter/setting"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 )

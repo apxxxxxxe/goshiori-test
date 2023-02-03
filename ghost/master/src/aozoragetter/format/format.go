@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apxxxxxxe/gohst/aozoragetter/setting"
+	"github.com/apxxxxxxe/goshiori-test/aozoragetter/setting"
 	"golang.org/x/net/html"
 )
 
